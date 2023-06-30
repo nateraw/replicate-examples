@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+import sys
+import tempfile
+
+import diffusers
+import torch
+
+# append project directory to path so predict.py can be imported
+sys.path.append(".")
+
+from predict import CACHE_DIR
+
+with tempfile.TemporaryDirectory() as temp_dir:
+    controlnet = diffusers.ControlNetModel.from_pretrained(
+        "DionTimmer/controlnet_qrcode-control_v1p_sd15", torch_dtype=torch.float16, cache_dir=temp_dir
+    )
+    pipe = diffusers.StableDiffusionControlNetImg2ImgPipeline.from_pretrained(
+        "runwayml/stable-diffusion-v1-5",
+        controlnet=controlnet,
+        safety_checker=None,
+        torch_dtype=torch.float16,
+        cache_dir=temp_dir,
+    )
+    pipe.scheduler = diffusers.DPMSolverMultistepScheduler.from_config(
+        pipe.scheduler.config, use_karras=True, algorithm_type="sde-dpmsolver++", cache_dir=temp_dir
+    )
+    pipe.save_pretrained(CACHE_DIR, safe_serialization=True)
