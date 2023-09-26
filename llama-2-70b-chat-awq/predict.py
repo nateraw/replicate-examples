@@ -7,25 +7,24 @@ from vllm import LLM, SamplingParams
 import torch
 from cog import BasePredictor, Input
 
-
 DEFAULT_MAX_NEW_TOKENS = 512
-DEFAULT_TEMPERATURE = 1.0
-DEFAULT_TOP_P = 1.0
+DEFAULT_TEMPERATURE = 0.8
+DEFAULT_TOP_P = 0.95
 DEFAULT_TOP_K = 50
-DEFAULT_PRESENCE_PENALTY = 1.15
+DEFAULT_PRESENCE_PENALTY = 1.0
 
 
-PROMPT_TEMPLATE = """### Instruction:
-{message}
-
-### Response:
-"""
+PROMPT_TEMPLATE = """\
+[INST] <<SYS>>
+You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+<</SYS>>
+{message}[/INST]"""
 
 class Predictor(BasePredictor):
 
     def setup(self):
         self.llm = LLM(
-            model="TheBloke/wizard-mega-13B-AWQ",
+            model="TheBloke/Llama-2-70B-chat-AWQ",
             quantization="awq",
             dtype="float16"
         )
@@ -70,5 +69,5 @@ class Predictor(BasePredictor):
 if __name__ == '__main__':
     p = Predictor()
     p.setup()
-    out = p.predict("Write me an itinerary for my dog's birthday party.", 512, 0.8, 0.95, 50, 1.0)
+    out = p.predict("Write me an itinerary for my dog's birthday party.", 1024, 0.8, 0.95, 50, 1.0)
     print(out)
