@@ -57,7 +57,7 @@ class Predictor(BasePredictor):
         self.model = Llama.build(
             ckpt_dir="weights-cache",
             tokenizer_path="weights-cache/tokenizer.model",
-            max_seq_len=512, # 2048 # 32768
+            max_seq_len=32768, # 2048 # 512
             max_batch_size=8,
         )
 
