@@ -350,8 +350,9 @@ class MoE(nn.Module):
         orig_shape = x.shape
         x = x.view(-1, x.shape[-1])
 
-        scores = self.gate(x).softmax(dim=-1)
+        scores = self.gate(x)
         expert_weights, expert_indices = torch.topk(scores, self.num_experts_per_tok, dim=-1)
+        expert_weights = expert_weights.softmax(dim=-1)
         flat_expert_indices = expert_indices.view(-1)
 
         x = x.repeat_interleave(self.num_experts_per_tok, dim=0)
