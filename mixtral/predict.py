@@ -75,6 +75,7 @@ class Predictor(BasePredictor):
             description="A probability threshold for generating the output. If < 1.0, only keep the top tokens with cumulative probability >= top_p (nucleus filtering). Nucleus filtering is described in Holtzman et al. (http://arxiv.org/abs/1904.09751).",
             default=DEFAULT_TOP_P,
         ),
+        # TODO - support optionally returning logprobs
         # logprobs: bool = Input(
         #     description="Whether to return the log probabilities of the generated tokens.", default=False
         # ),
