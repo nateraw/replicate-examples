@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 
 qrcode_generation/weights-cache/
+mixtral/weights-cache/
