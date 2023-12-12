@@ -125,7 +125,7 @@ class TextGenerationPredictor(BasePredictor):
 
 Predictor = TextGenerationPredictor
 Predictor.hf_model_id = "mixtral-8x7b-instruct-v0.1"
-Predictor.gcp_bucket_weights = "https://weights.replicate.delivery/replicate-weights/mixtral-8x7b-instruct-v0.1"
+Predictor.gcp_bucket_weights = "https://weights.replicate.delivery/default/mixtral-8x7b-instruct-v0.1"
 Predictor.remote_filenames = [
     "config.json",
     "generation_config.json",
