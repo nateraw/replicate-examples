@@ -1,20 +1,7 @@
-
-
-def install_megablocks():
-    import subprocess
-    import sys
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "megablocks"])
-        print("Successfully installed megablocks.")
-    except subprocess.CalledProcessError:
-        print("Failed to install megablocks.")
-
-
 import asyncio
 from typing import AsyncIterator, List, Union
 import time
 from cog import BasePredictor, Input, ConcatenateIterator
-# from cog_hf_template.download_utils import maybe_pget_weights
 from vllm import AsyncLLMEngine
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.sampling_params import SamplingParams
@@ -22,43 +9,37 @@ from vllm.sampling_params import SamplingParams
 from downloader import Downloader
 
 
-# MODEL_ID = "thebloke/yi-6b-awq"
-# PROMPT_TEMPLATE = "{prompt}"
-# WEIGHTS_URL = "https://weights.replicate.delivery/hf/thebloke/yi-6b-awq/3eafeffffae6680fa0b084c1cff55aafdb7f0a85"
-# REMOTE_FILES = [
-#     "LICENSE",
-#     "README.md",
-#     "config.json",
-#     "configuration_yi.py",
-#     "generation_config.json",
-#     "model.safetensors",
-#     "modeling_yi.py",
-#     "quant_config.json",
-#     "special_tokens_map.json",
-#     "tokenization_yi.py",
-#     "tokenizer.json",
-#     "tokenizer.model",
-#     "tokenizer_config.json",
-# ]
-
-
-
 # MODEL_ID = "mixtral-8x7b-32kseqlen"
 MODEL_ID = "mixtral-8x7b-instruct-v0.1"
-# WEIGHTS_URL = "https://weights.replicate.delivery/hf/mixtral-8x7b-32kseqlen"
-# REMOTE_FILES = [
-#     "consolidated.00.pth-split00.pth",
-#     "consolidated.00.pth-split01.pth",
-#     "consolidated.00.pth-split02.pth",
-#     "consolidated.00.pth-split03.pth",
-#     "consolidated.00.pth-split04.pth",
-#     "consolidated.00.pth-split05.pth",
-#     "consolidated.00.pth-split06.pth",
-#     "consolidated.00.pth-split07.pth",
-#     "consolidated.00.pth-split08.pth",
-#     "params.json",
-#     "tokenizer.model",
-# ]
+# MODEL_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+WEIGHTS_URL = "https://weights.replicate.delivery/default/mixtral-8x7b-instruct-v0.1"
+REMOTE_FILES = [
+    "config.json",
+    "model.safetensors",
+    # "model-00001-of-00019.safetensors",
+    # "model-00002-of-00019.safetensors",
+    # "model-00003-of-00019.safetensors",
+    # "model-00004-of-00019.safetensors",
+    # "model-00005-of-00019.safetensors",
+    # "model-00006-of-00019.safetensors",
+    # "model-00007-of-00019.safetensors",
+    # "model-00008-of-00019.safetensors",
+    # "model-00009-of-00019.safetensors",
+    # "model-00010-of-00019.safetensors",
+    # "model-00011-of-00019.safetensors",
+    # "model-00012-of-00019.safetensors",
+    # "model-00013-of-00019.safetensors",
+    # "model-00014-of-00019.safetensors",
+    # "model-00015-of-00019.safetensors",
+    # "model-00016-of-00019.safetensors",
+    # "model-00017-of-00019.safetensors",
+    # "model-00018-of-00019.safetensors",
+    # "model-00019-of-00019.safetensors",
+    "special_tokens_map.json",
+    "tokenizer.json",
+    "tokenizer.model",
+    "tokenizer_config.json"
+]
 PROMPT_TEMPLATE = "{prompt}"
 
 
@@ -159,24 +140,17 @@ class VLLMPipeline:
 
 class Predictor(BasePredictor):
     def setup(self):
-        # maybe_pget_weights(
-        #     path=MODEL_ID,
-        #     remote_path=WEIGHTS_URL,
-        #     remote_filenames=REMOTE_FILES,
-        # )
-        # Example usage
-        install_megablocks()
-        # downloader = Downloader()
-        # start = time.time()
-        # downloader.sync_maybe_download_files(
-        #     MODEL_ID, WEIGHTS_URL, REMOTE_FILES
-        # )
-        # print(f"downloading weights took {time.time() - start:.3f}s")
+        downloader = Downloader()
+        start = time.time()
+        downloader.sync_maybe_download_files(
+            MODEL_ID, WEIGHTS_URL, REMOTE_FILES
+        )
+        print(f"downloading weights took {time.time() - start:.3f}s")
         self.llm = VLLMPipeline(
             MODEL_ID,
             # quantization="awq",
             dtype="auto",
-            tensor_parallel_size=2,
+            tensor_parallel_size=4,
             trust_remote_code=True,
         )
 
@@ -232,7 +206,7 @@ if __name__ == "__main__":
     p = Predictor()
     p.setup()
     for text in p.predict(
-        "Here are the top 10 best all-time movie quotes:\n\n1. ",
+        "Write a blogpost about SEO directed at a technical audience",
         512,
         0.8,
         0.95,
