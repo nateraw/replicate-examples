@@ -6,41 +6,22 @@ from vllm import AsyncLLMEngine
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.sampling_params import SamplingParams
 
-from downloader import Downloader
+# from downloader import Downloader
+from utils import maybe_download_with_pget, delay_prints
 
 
 # MODEL_ID = "mixtral-8x7b-32kseqlen"
 MODEL_ID = "mixtral-8x7b-instruct-v0.1"
-# MODEL_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 WEIGHTS_URL = "https://weights.replicate.delivery/default/mixtral-8x7b-instruct-v0.1"
 REMOTE_FILES = [
     "config.json",
     "model.safetensors",
-    # "model-00001-of-00019.safetensors",
-    # "model-00002-of-00019.safetensors",
-    # "model-00003-of-00019.safetensors",
-    # "model-00004-of-00019.safetensors",
-    # "model-00005-of-00019.safetensors",
-    # "model-00006-of-00019.safetensors",
-    # "model-00007-of-00019.safetensors",
-    # "model-00008-of-00019.safetensors",
-    # "model-00009-of-00019.safetensors",
-    # "model-00010-of-00019.safetensors",
-    # "model-00011-of-00019.safetensors",
-    # "model-00012-of-00019.safetensors",
-    # "model-00013-of-00019.safetensors",
-    # "model-00014-of-00019.safetensors",
-    # "model-00015-of-00019.safetensors",
-    # "model-00016-of-00019.safetensors",
-    # "model-00017-of-00019.safetensors",
-    # "model-00018-of-00019.safetensors",
-    # "model-00019-of-00019.safetensors",
     "special_tokens_map.json",
     "tokenizer.json",
     "tokenizer.model",
     "tokenizer_config.json"
 ]
-PROMPT_TEMPLATE = "{prompt}"
+PROMPT_TEMPLATE = "<s>[INST] {prompt} [/INST]"
 
 
 DEFAULT_MAX_NEW_TOKENS = 512
@@ -140,9 +121,8 @@ class VLLMPipeline:
 
 class Predictor(BasePredictor):
     def setup(self):
-        downloader = Downloader()
         start = time.time()
-        downloader.sync_maybe_download_files(
+        maybe_download_with_pget(
             MODEL_ID, WEIGHTS_URL, REMOTE_FILES
         )
         print(f"downloading weights took {time.time() - start:.3f}s")
@@ -152,8 +132,10 @@ class Predictor(BasePredictor):
             dtype="auto",
             tensor_parallel_size=4,
             trust_remote_code=True,
+            # max_model_len=256
         )
 
+    @delay_prints(REALLY_EAT_MY_PRINT_STATEMENTS=True)
     def predict(
         self,
         prompt: str,
