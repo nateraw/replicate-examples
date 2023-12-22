@@ -21,7 +21,7 @@ REMOTE_FILES = [
     "tokenizer.model",
     "tokenizer_config.json"
 ]
-PROMPT_TEMPLATE = "<s>[INST] {prompt} [/INST]"
+PROMPT_TEMPLATE = "<s>[INST] {prompt} [/INST] "
 
 
 DEFAULT_MAX_NEW_TOKENS = 512
