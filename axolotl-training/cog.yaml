@@ -26,6 +26,7 @@ build:
     # - 'pip install "axolotl[flash-attn,deepspeed]@git+https://github.com/OpenAccess-AI-Collective/axolotl"'
     - 'CUDA_HOME=/usr/bin/cuda git clone https://github.com/OpenAccess-AI-Collective/axolotl && pip install -e "./axolotl[flash-attn,deepspeed]"'
     - curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/download/v0.5.4/pget_linux_x86_64" && chmod +x /usr/local/bin/pget
+    # - pip install "peft==0.6.0"
     - bash -c 'ln -s /usr/local/lib/python3.11/site-packages/torch/lib/lib{nv,cu}* /usr/lib'
 
 # predict.py defines how predictions are run on your model
