@@ -1,13 +1,17 @@
-For now also need axolotl cloned in this dir.
+To run training locally:
 
 ```
-cd axolotl-training
-mkdir -p src
-git clone  https://github.com/OpenAccess-AI-Collective/axolotl ./src
+cog run python train.py --config=config/debug.yaml
 ```
 
-Can run this locally with:
+To run inference locally (assuming you ran the above and have a `training_output.zip` file in the current directory):
 
 ```
-sudo cog run accelerate launch --multi_gpu --mixed_precision=fp16 --num_processes=2 --num_machines 1 src/scripts/finetune.py src/examples/openllama-3b/lora.yml
+cog run python predict.py
+```
+
+Push to Replicate:
+
+```
+cog push r8.im/nateraw/axolotl-trainer-llama-2-7b
 ```

@@ -8,10 +8,10 @@ load_in_4bit: false
 strict: false
 
 datasets:
-  - path: mhenrichsen/alpaca_2k_test
+  - path: nateraw/axolotl-english-to-hinglish
     type: alpaca
 dataset_prepared_path:
-val_set_size: 0.05
+val_set_size: 0
 output_dir: ./lora-out
 
 sequence_len: 4096
@@ -26,15 +26,15 @@ lora_dropout: 0.05
 lora_target_linear: true
 lora_fan_in_fan_out:
 
-wandb_project: nate-llama-2-alpaca-2k-test-lora
+wandb_project: axolotl-english-to-hinglish
 wandb_entity:
 wandb_watch:
 wandb_name:
 wandb_log_model:
 
-gradient_accumulation_steps: 4
-micro_batch_size: 2
-num_epochs: 4
+gradient_accumulation_steps: 1
+micro_batch_size: 10
+num_epochs: 3
 optimizer: adamw_bnb_8bit
 lr_scheduler: cosine
 learning_rate: 0.0002
@@ -53,14 +53,19 @@ logging_steps: 1
 xformers_attention:
 flash_attention: true
 
-warmup_steps: 10
+######DEBUGGING######
+max_steps: 8
+warmup_steps: 0
+#####################
+
+# warmup_steps: 100
 evals_per_epoch: 1
 eval_table_size:
 eval_table_max_new_tokens: 128
 saves_per_epoch: 0
 save_total_limit: 0
 debug: true
-deepspeed:
+deepspeed: deepspeed/zero3_offload_bf16.json
 weight_decay: 0.0
 fsdp:
 fsdp_config:

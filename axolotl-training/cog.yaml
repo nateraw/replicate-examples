@@ -16,21 +16,16 @@ build:
 
   # a list of packages in the format <package-name>==<version>
   python_packages:
-    # - "hf_transfer==0.1.3"
     - "aiohttp[speedups]"
     - "torch==2.1.1"
     - "packaging==23.2"
 
   # commands run after the environment is setup
   run:
-    # - 'pip install "axolotl[flash-attn,deepspeed]@git+https://github.com/OpenAccess-AI-Collective/axolotl"'
-    - 'CUDA_HOME=/usr/bin/cuda git clone https://github.com/OpenAccess-AI-Collective/axolotl && pip install -e "./axolotl[flash-attn,deepspeed]"'
+    - 'git clone https://github.com/OpenAccess-AI-Collective/axolotl && pip install -e "./axolotl[flash-attn,deepspeed]"'
     - curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/download/v0.5.4/pget_linux_x86_64" && chmod +x /usr/local/bin/pget
-    # - pip install "peft==0.6.0"
-    - bash -c 'ln -s /usr/local/lib/python3.11/site-packages/torch/lib/lib{nv,cu}* /usr/lib'
 
 # predict.py defines how predictions are run on your model
-
 predict: "predict.py:Predictor"
+# train.py is the script that trains your model
 train: "train.py:main"
-# sudo cog run accelerate launch --multi_gpu --mixed_precision=fp16 --num_processes=2 --num_machines 1 src/scripts/finetune.py src/examples/openllama-3b/lora.yml
