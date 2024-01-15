@@ -10,6 +10,7 @@ from utils import download_and_unzip_weights
 # Set HF_HOME before importing transformers
 CACHE_DIR = "./hf-cache"
 os.environ["HF_HOME"] = CACHE_DIR
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 from transformers import (  # noqa: E402
     AutoModelForCausalLM,
     AutoTokenizer,

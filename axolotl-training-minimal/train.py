@@ -22,7 +22,7 @@ def zip_files(directory, output_path, file_paths):
 # Enables anonymous logging to wandb
 os.environ["HF_HOME"] = "./hf-cache"
 os.environ["WANDB_ANONYMOUS"] = "must" if not os.environ.get("WANDB_API_KEY") else "allow"
-os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "true"
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 # where the adapter weights will be saved
 OUTPUT_DIR = "./lora-out"
 
