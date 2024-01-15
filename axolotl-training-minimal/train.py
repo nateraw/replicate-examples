@@ -73,11 +73,7 @@ def main(
             raise Exception(f"Training failed with exit code {return_code}! Check logs for details")
         directory = Path(OUTPUT_DIR)
         weights_out_path = Path("training_output.zip")
-        zip_files(
-            directory,
-            weights_out_path,
-            sorted(f for f in directory.glob("*") if f.is_file())
-        )
+        zip_files(directory, weights_out_path, sorted(f for f in directory.glob("*") if f.is_file()))
         return TrainingOutput(weights=weights_out_path)
     finally:
         if p and p.poll() is None:

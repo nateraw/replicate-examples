@@ -10,14 +10,14 @@ try:
         owner=dest_model_id.split("/")[0],
         name=dest_model_id.split("/")[1],
         visibility=visibility,
-        hardware="gpu-a40-large"  # This is the hardware used for inference
+        hardware="gpu-a40-large",  # This is the hardware used for inference
     )
 except ReplicateException as e:
     print("Model already exists")
 
 training = replicate.trainings.create(
-  version=training_model_id,
-  input={"config": open("config/tinyllama_debug.yaml", "rb")},
-  destination=dest_model_id,
+    version=training_model_id,
+    input={"config": open("config/tinyllama_debug.yaml", "rb")},
+    destination=dest_model_id,
 )
 print(training)

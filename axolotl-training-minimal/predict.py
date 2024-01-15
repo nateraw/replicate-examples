@@ -23,6 +23,7 @@ BASE_MODEL_ID = "nousresearch/llama-2-7b-hf"
 PROMPT_TEMPLATE = "{prompt}"
 PEFT_MODEL_DIR = "peft_model"
 
+
 class Predictor(BasePredictor):
     def setup(self, weights: Optional[Path] = None):
         print("Starting setup")
@@ -36,7 +37,6 @@ class Predictor(BasePredictor):
             print(f"Overriding default Base model id {BASE_MODEL_ID} with: {base_model_id}")
         else:
             print("----- NOT USING ADAPTER MODEL -----")
-
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = AutoModelForCausalLM.from_pretrained(
