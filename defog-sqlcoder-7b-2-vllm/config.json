@@ -1,0 +1,16 @@
+{
+    "model_id": "defog/sqlcoder-7b-2",
+    "weights_url": "https://weights.replicate.delivery/hf/defog/sqlcoder-7b-2/cf632d89fc491eaef46025ad375c398114adbe50",
+    "remote_filenames": [
+        "config.json",
+        "generation_config.json",
+        "model-00001-of-00003.safetensors",
+        "model-00002-of-00003.safetensors",
+        "model-00003-of-00003.safetensors",
+        "model.safetensors.index.json",
+        "special_tokens_map.json",
+        "tokenizer.json",
+        "tokenizer_config.json"
+    ],
+    "prompt_template": "### Task\nGenerate a SQL query to answer [QUESTION]{question}[/QUESTION]\n\n### Instructions\n- If you cannot answer the question with the available database schema, return 'I do not know'\n\n### Database Schema\nThe query will run on a database with the following schema:\n{table_metadata}\n\n### Answer\nGiven the database schema, here is the SQL query that answers [QUESTION]{question}[/QUESTION]\n[SQL]\n"
+}
