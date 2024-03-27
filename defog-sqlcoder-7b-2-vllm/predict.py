@@ -123,7 +123,6 @@ class Predictor(BasePredictor):
             **{"quantization": "awq"} if "awq" in MODEL_ID else {},
         )
 
-    @delay_prints(REALLY_EAT_MY_PRINT_STATEMENTS=True)
     async def predict(
         self,
         # prompt: str,
@@ -157,20 +156,21 @@ class Predictor(BasePredictor):
             default=PROMPT_TEMPLATE,
         ),
     ) -> ConcatenateIterator[str]:
-        start = time.time()
-        generate = self.llm(
-            # prompt=prompt_template.format(prompt=prompt),
-            prompt=prompt_template.format(question=question, table_metadata=table_metadata),
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-            presence_penalty=presence_penalty,
-            frequency_penalty=frequency_penalty,
-        )
-        async for text in generate:
-            yield text
-        print(f"\ngeneration took {time.time() - start:.3f}s")
+        with delay_prints(REALLY_EAT_MY_PRINT_STATEMENTS=True):
+            start = time.time()
+            generate = self.llm(
+                # prompt=prompt_template.format(prompt=prompt),
+                prompt=prompt_template.format(question=question, table_metadata=table_metadata),
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
+                presence_penalty=presence_penalty,
+                frequency_penalty=frequency_penalty,
+            )
+            async for text in generate:
+                yield text
+            print(f"\ngeneration took {time.time() - start:.3f}s")
 
 
 table_metadata = """\

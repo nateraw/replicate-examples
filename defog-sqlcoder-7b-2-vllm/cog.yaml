@@ -21,6 +21,7 @@ build:
 
   # commands run after the environment is setup
   run:
+    # - --mount=type=cache,target=/root/.cache/pip pip install "pydantic<2.0.0"
     - pip install "pydantic<2.0.0"
     - CUDA_HOME=/usr/local/cuda pip install --ignore-installed vllm==0.3.0
     - pip install https://r2.drysys.workers.dev/tmp/cog-0.10.0a6-py3-none-any.whl
