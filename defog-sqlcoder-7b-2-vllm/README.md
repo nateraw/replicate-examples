@@ -7,8 +7,8 @@
 
 
 
-## Interactive Local Run
+## Make Predictions Localy
 
 ```
-cog run python -i predict.py
+sudo cog predict -i question="hello" -i table_metadata="blah"
 ```
