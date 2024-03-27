@@ -112,7 +112,7 @@ class VLLMPipeline:
 class Predictor(BasePredictor):
     async def setup(self):
         start = time.time()
-        maybe_download_with_pget(MODEL_ID, WEIGHTS_URL, REMOTE_FILES)
+        await maybe_download_with_pget(MODEL_ID, WEIGHTS_URL, REMOTE_FILES)
         print(f"downloading weights took {time.time() - start:.3f}s")
         self.llm = VLLMPipeline(
             MODEL_ID,
