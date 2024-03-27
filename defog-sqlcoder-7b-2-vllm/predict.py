@@ -1,4 +1,5 @@
 import os
+
 os.environ["HF_HOME"] = "./hf-cache"
 import asyncio
 from pathlib import Path
@@ -48,7 +49,7 @@ class VLLMPipeline:
         async for generated_text in results_generator:
             yield generated_text
 
-    def __call__(
+    async def __call__(
         self,
         prompt: str,
         max_new_tokens: int,
@@ -92,34 +93,24 @@ class VLLMPipeline:
             presence_penalty=presence_penalty,
         )
 
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
         gen = self.generate_stream(
             prompt,
             sampling_params,
         )
 
         generation_length = 0
-        while True:
-            try:
-                request_output = loop.run_until_complete(gen.__anext__())
-                assert len(request_output.outputs) == 1
-                generated_text = request_output.outputs[0].text
-                if incremental_generation:
-                    yield generated_text[generation_length:]
-                else:
-                    yield generated_text
-                generation_length = len(generated_text)
-            except StopAsyncIteration:
-                break
+        async for request_output in gen:
+            assert len(request_output.outputs) == 1
+            generated_text = request_output.outputs[0].text
+            if incremental_generation:
+                yield generated_text[generation_length:]
+            else:
+                yield generated_text
+            generation_length = len(generated_text)
 
 
 class Predictor(BasePredictor):
-    def setup(self):
+    async def setup(self):
         start = time.time()
         maybe_download_with_pget(MODEL_ID, WEIGHTS_URL, REMOTE_FILES)
         print(f"downloading weights took {time.time() - start:.3f}s")
@@ -133,7 +124,7 @@ class Predictor(BasePredictor):
         )
 
     @delay_prints(REALLY_EAT_MY_PRINT_STATEMENTS=True)
-    def predict(
+    async def predict(
         self,
         # prompt: str,
         question: str,
@@ -177,7 +168,7 @@ class Predictor(BasePredictor):
             presence_penalty=presence_penalty,
             frequency_penalty=frequency_penalty,
         )
-        for text in generate:
+        async for text in generate:
             yield text
         print(f"\ngeneration took {time.time() - start:.3f}s")
 
@@ -222,7 +213,9 @@ CREATE TABLE product_suppliers (
 -- sales.salesperson_id can be joined with salespeople.salesperson_id
 -- product_suppliers.product_id can be joined with products.product_id"""
 
-question = "Do we get more sales from customers in New York compared to customers in San Francisco? Give me the total sales for each city, and the difference between the two.",
+question = (
+    "Do we get more sales from customers in New York compared to customers in San Francisco? Give me the total sales for each city, and the difference between the two.",
+)
 
 
 if __name__ == "__main__":

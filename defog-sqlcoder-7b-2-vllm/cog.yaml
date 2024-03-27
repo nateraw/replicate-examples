@@ -21,10 +21,11 @@ build:
 
   # commands run after the environment is setup
   run:
-    - CUDA_HOME=/usr/local/cuda pip install vllm==0.3.0
+    - CUDA_HOME=/usr/local/cuda pip install vllm==0.3.0 "pydantic<2.0.0" https://r2.drysys.workers.dev/tmp/cog-0.10.0a6-py3-none-any.whl
     - curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/download/v0.6.0/pget_linux_x86_64" && chmod +x /usr/local/bin/pget
     - bash -c 'ln -s /usr/local/lib/python3.11/site-packages/torch/lib/lib{nv,cu}* /usr/lib'
-    - pip install "pydantic<2.0.0"
+    - ln -sf $(which echo) $(which pip)
 
 # predict.py defines how predictions are run on your model
 predict: "predict.py:Predictor"
+concurrency: 32
