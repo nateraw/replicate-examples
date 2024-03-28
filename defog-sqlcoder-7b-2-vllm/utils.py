@@ -120,7 +120,7 @@ async def download_files_with_pget(remote_path: str, path: str, files: list[str]
     await process.communicate(download_jobs.encode())
 
 
-def maybe_download_with_pget(
+async def maybe_download_with_pget(
     path: str,
     remote_path: tp.Optional[str] = None,
     remote_filenames: tp.Optional[list[str]] = None,
@@ -153,7 +153,7 @@ def maybe_download_with_pget(
             missing_files = remote_filenames or []
         else:
             missing_files = check_files_exist(remote_filenames or [], path)
-        get_loop().run_until_complete(download_files_with_pget(remote_path, path, missing_files))
+        await download_files_with_pget(remote_path, path, missing_files)
 
     return path
 

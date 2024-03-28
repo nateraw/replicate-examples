@@ -1,19 +1,20 @@
 import os
+
+
 os.environ["HF_HOME"] = "./hf-cache"
-import asyncio
+import json
+import time
 from pathlib import Path
 from typing import AsyncIterator, List, Union
 from uuid import uuid4
-import time
-from cog import BasePredictor, Input, ConcatenateIterator
+
+import torch
+from cog import BasePredictor, ConcatenateIterator, Input
+from utils import delay_prints, maybe_download_with_pget
 from vllm import AsyncLLMEngine
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.sampling_params import SamplingParams
-import torch
 
-from utils import maybe_download_with_pget, delay_prints
-
-import json
 
 cfg = json.loads(Path("config.json").read_text())
 print(f"CFG: {json.dumps(cfg, indent=2, sort_keys=True)}")
@@ -48,7 +49,7 @@ class VLLMPipeline:
         async for generated_text in results_generator:
             yield generated_text
 
-    def __call__(
+    async def __call__(
         self,
         prompt: str,
         max_new_tokens: int,
@@ -92,48 +93,36 @@ class VLLMPipeline:
             presence_penalty=presence_penalty,
         )
 
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
         gen = self.generate_stream(
             prompt,
             sampling_params,
         )
 
         generation_length = 0
-        while True:
-            try:
-                request_output = loop.run_until_complete(gen.__anext__())
-                assert len(request_output.outputs) == 1
-                generated_text = request_output.outputs[0].text
-                if incremental_generation:
-                    yield generated_text[generation_length:]
-                else:
-                    yield generated_text
-                generation_length = len(generated_text)
-            except StopAsyncIteration:
-                break
+        async for request_output in gen:
+            assert len(request_output.outputs) == 1
+            generated_text = request_output.outputs[0].text
+            if incremental_generation:
+                yield generated_text[generation_length:]
+            else:
+                yield generated_text
+            generation_length = len(generated_text)
 
 
 class Predictor(BasePredictor):
-    def setup(self):
+    async def setup(self):
         start = time.time()
-        maybe_download_with_pget(MODEL_ID, WEIGHTS_URL, REMOTE_FILES)
+        await maybe_download_with_pget(MODEL_ID, WEIGHTS_URL, REMOTE_FILES)
         print(f"downloading weights took {time.time() - start:.3f}s")
         self.llm = VLLMPipeline(
             MODEL_ID,
             dtype="auto",
             tensor_parallel_size=torch.cuda.device_count(),
             trust_remote_code=TRUST_REMOTE_CODE,
-            # max_model_len=256,
             **{"quantization": "awq"} if "awq" in MODEL_ID else {},
         )
 
-    @delay_prints(REALLY_EAT_MY_PRINT_STATEMENTS=True)
-    def predict(
+    async def predict(
         self,
         # prompt: str,
         question: str,
@@ -166,20 +155,21 @@ class Predictor(BasePredictor):
             default=PROMPT_TEMPLATE,
         ),
     ) -> ConcatenateIterator[str]:
-        start = time.time()
-        generate = self.llm(
-            # prompt=prompt_template.format(prompt=prompt),
-            prompt=prompt_template.format(question=question, table_metadata=table_metadata),
-            max_new_tokens=max_new_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            top_k=top_k,
-            presence_penalty=presence_penalty,
-            frequency_penalty=frequency_penalty,
-        )
-        for text in generate:
-            yield text
-        print(f"\ngeneration took {time.time() - start:.3f}s")
+        with delay_prints(REALLY_EAT_MY_PRINT_STATEMENTS=True):
+            start = time.time()
+            generate = self.llm(
+                # prompt=prompt_template.format(prompt=prompt),
+                prompt=prompt_template.format(question=question, table_metadata=table_metadata),
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                top_k=top_k,
+                presence_penalty=presence_penalty,
+                frequency_penalty=frequency_penalty,
+            )
+            async for text in generate:
+                yield text
+            print(f"\ngeneration took {time.time() - start:.3f}s")
 
 
 table_metadata = """\
@@ -197,9 +187,9 @@ CREATE TABLE customers (
 );
 
 CREATE TABLE salespeople (
-  salesperson_id INTEGER PRIMARY KEY, -- Unique ID for each salesperson 
+  salesperson_id INTEGER PRIMARY KEY, -- Unique ID for each salesperson
   name VARCHAR(50), -- Name of the salesperson
-  region VARCHAR(50) -- Geographic sales region 
+  region VARCHAR(50) -- Geographic sales region
 );
 
 CREATE TABLE sales (
@@ -207,7 +197,7 @@ CREATE TABLE sales (
   product_id INTEGER, -- ID of product sold
   customer_id INTEGER,  -- ID of customer who made purchase
   salesperson_id INTEGER, -- ID of salesperson who made the sale
-  sale_date DATE, -- Date the sale occurred 
+  sale_date DATE, -- Date the sale occurred
   quantity INTEGER -- Quantity of product sold
 );
 
@@ -218,11 +208,13 @@ CREATE TABLE product_suppliers (
 );
 
 -- sales.product_id can be joined with products.product_id
--- sales.customer_id can be joined with customers.customer_id 
+-- sales.customer_id can be joined with customers.customer_id
 -- sales.salesperson_id can be joined with salespeople.salesperson_id
 -- product_suppliers.product_id can be joined with products.product_id"""
 
-question = "Do we get more sales from customers in New York compared to customers in San Francisco? Give me the total sales for each city, and the difference between the two.",
+question = (
+    "Do we get more sales from customers in New York compared to customers in San Francisco? Give me the total sales for each city, and the difference between the two.",
+)
 
 
 if __name__ == "__main__":
