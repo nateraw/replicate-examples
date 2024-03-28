@@ -1,20 +1,20 @@
 import os
 
+
 os.environ["HF_HOME"] = "./hf-cache"
-import asyncio
+import json
+import time
 from pathlib import Path
 from typing import AsyncIterator, List, Union
 from uuid import uuid4
-import time
-from cog import BasePredictor, Input, ConcatenateIterator
+
+import torch
+from cog import BasePredictor, ConcatenateIterator, Input
+from utils import delay_prints, maybe_download_with_pget
 from vllm import AsyncLLMEngine
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.sampling_params import SamplingParams
-import torch
 
-from utils import maybe_download_with_pget, delay_prints
-
-import json
 
 cfg = json.loads(Path("config.json").read_text())
 print(f"CFG: {json.dumps(cfg, indent=2, sort_keys=True)}")
@@ -119,7 +119,6 @@ class Predictor(BasePredictor):
             dtype="auto",
             tensor_parallel_size=torch.cuda.device_count(),
             trust_remote_code=TRUST_REMOTE_CODE,
-            # max_model_len=256,
             **{"quantization": "awq"} if "awq" in MODEL_ID else {},
         )
 
@@ -188,9 +187,9 @@ CREATE TABLE customers (
 );
 
 CREATE TABLE salespeople (
-  salesperson_id INTEGER PRIMARY KEY, -- Unique ID for each salesperson 
+  salesperson_id INTEGER PRIMARY KEY, -- Unique ID for each salesperson
   name VARCHAR(50), -- Name of the salesperson
-  region VARCHAR(50) -- Geographic sales region 
+  region VARCHAR(50) -- Geographic sales region
 );
 
 CREATE TABLE sales (
@@ -198,7 +197,7 @@ CREATE TABLE sales (
   product_id INTEGER, -- ID of product sold
   customer_id INTEGER,  -- ID of customer who made purchase
   salesperson_id INTEGER, -- ID of salesperson who made the sale
-  sale_date DATE, -- Date the sale occurred 
+  sale_date DATE, -- Date the sale occurred
   quantity INTEGER -- Quantity of product sold
 );
 
@@ -209,7 +208,7 @@ CREATE TABLE product_suppliers (
 );
 
 -- sales.product_id can be joined with products.product_id
--- sales.customer_id can be joined with customers.customer_id 
+-- sales.customer_id can be joined with customers.customer_id
 -- sales.salesperson_id can be joined with salespeople.salesperson_id
 -- product_suppliers.product_id can be joined with products.product_id"""
 
