@@ -1,0 +1,65 @@
+# Configuration for Cog ⚙️
+# Reference: https://github.com/replicate/cog/blob/main/docs/yaml.md
+
+build:
+  # set to true if your model requires a GPU
+  gpu: true
+  cuda: "12.1"
+
+  # a list of ubuntu apt packages to install
+  system_packages:
+    - ffmpeg
+    - unzip
+    - build-essential
+    - libeigen3-dev
+    - libyaml-dev
+    - libfftw3-dev
+    - libtag1-dev>=1.9
+    - libchromaprint-dev
+    - numactl
+    - sox
+    # - "libgl1-mesa-glx"
+    # - "libglib2.0-0"
+
+  # python version in the form '3.8' or '3.8.12'
+  python_version: "3.9"
+
+  # a list of packages in the format <package-name>==<version>
+  python_packages:
+    - "demucs"
+    - "torch==2.1.0"
+    - "av"
+    - "einops"
+    - flashy>=0.0.1
+    - "hydra-core>=1.1"
+    - "hydra_colorlog"
+    - "julius"
+    - "num2words"
+    - "numpy"
+    - "sentencepiece"
+    - "spacy==3.5.2"
+    - "torchaudio"
+    - "huggingface_hub"
+    - "tqdm"
+    - "transformers>=4.31.0"
+    - "xformers==0.0.22.post4 --index-url https://download.pytorch.org/whl/cu121"
+    - "demucs"
+    - "librosa"
+    - "gradio"
+    - "torchmetrics"
+    - "encodec"
+    - "protobuf"
+    - "tensorboard>=1.15"
+    - "pydub"
+    - "numba"
+    - "essentia-tensorflow"
+    - "moviepy"
+
+  # commands run after the environment is setup
+  run:
+    # TODO these should be in above python deps list.
+    - pip install -U audiocraft
+    - pip install hf-transfer
+# predict.py defines how predictions are run on your model
+predict: "predict.py:Predictor"
+# train: "train.py:train"
